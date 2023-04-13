@@ -37,17 +37,23 @@ jobs:
       - run: dotnet publish src/N_m3u8DL-RE -r win-x64 -c Release -o artifact-x64
       - run: dotnet publish src/N_m3u8DL-RE -r win-arm64 -c Release -o artifact-arm64
 
+      - name: Set executable permissions for Windows
+        if: runner.os == 'Windows'
+        run: |
+          chmod +x artifact-x64/*.exe
+          chmod +x artifact-arm64/*.exe
+
       - name: Upload Artifact[win-x64]
         uses: actions/upload-artifact@v1.0.0
         with:
           name: N_m3u8DL-RE_Beta_win-x64
-          path: artifact-x64\N_m3u8DL-RE.exe
+          path: artifact-x64/
 
       - name: Upload Artifact[win-arm64]
         uses: actions/upload-artifact@v1.0.0
         with:
           name: N_m3u8DL-RE_Beta_win-arm64
-          path: artifact-arm64\N_m3u8DL-RE.exe
+          path: artifact-arm64/
 
   build-linux-x64:
     runs-on: ubuntu-latest
@@ -65,11 +71,15 @@ jobs:
       - run: apt-get install -y libicu-dev libcurl4-openssl-dev zlib1g-dev libkrb5-dev
       - run: dotnet publish src/N_m3u8DL-RE -r linux-x64 -c Release -o artifact
 
+      - name: Set executable permissions for Linux
+        if: runner.os == 'Linux'
+        run: chmod +x artifact/N_m3u8DL-RE
+
       - name: Upload Artifact[linux-x64]
         uses: actions/upload-artifact@v1.0.0
         with:
           name: N_m3u8DL-RE_Beta_linux-x64
-          path: artifact/N_m3u8DL-RE
+          path: artifact/
 
   build-linux-arm64:
     runs-on: ubuntu-latest
@@ -84,11 +94,15 @@ jobs:
           include-prerelease: true
       - run: dotnet publish src/N_m3u8DL-RE -r linux-arm64 -c Release -p:CppCompilerAndLinker=clang-9 -p:SysRoot=/crossrootfs/arm64 -o artifact
 
+      - name: Set executable permissions for Linux
+        if: runner.os == 'Linux'
+        run: chmod +x artifact/N_m3u8DL-RE
+
       - name: Upload Artifact[linux-arm64]
         uses: actions/upload-artifact@v1.0.0
         with:
           name: N_m3u8DL-RE_Beta_linux-arm64
-          path: artifact/N_m3u8DL-RE
+          path: artifact/
 
   build-mac-x64-arm64:
     runs-on: macos-latest
