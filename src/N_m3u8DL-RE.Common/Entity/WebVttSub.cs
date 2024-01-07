@@ -126,7 +126,10 @@ namespace N_m3u8DL_RE.Common.Entity
         {
             if (VttClassRegex().IsMatch(text))
             {
-                return VttClassRegex().Match(text).Groups[1].Value;
+                return string.Join(Environment.NewLine, text.Split('\n').Select(line => line.TrimEnd()).Select(line =>
+                {
+                    return string.Concat(VttClassRegex().Matches(line).Select(x => x.Groups[1].Value + " "));
+                })).TrimEnd();
             }
             else return text;
         }
@@ -220,6 +223,22 @@ namespace N_m3u8DL_RE.Common.Entity
             }
             sb.AppendLine();
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// 字幕向前平移指定时间
+        /// </summary>
+        /// <param name="time"></param>
+        public void LeftShiftTime(TimeSpan time)
+        {
+            foreach (var cue in this.Cues)
+            {
+                if (cue.StartTime.TotalSeconds - time.TotalSeconds > 0) cue.StartTime -= time;
+                else cue.StartTime = TimeSpan.FromSeconds(0);
+
+                if (cue.EndTime.TotalSeconds - time.TotalSeconds > 0) cue.EndTime -= time;
+                else cue.EndTime = TimeSpan.FromSeconds(0);
+            }
         }
 
         public string ToVtt()

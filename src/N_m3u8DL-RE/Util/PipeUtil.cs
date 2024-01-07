@@ -1,4 +1,7 @@
-﻿using System;
+﻿using N_m3u8DL_RE.Common.Log;
+using N_m3u8DL_RE.Common.Resource;
+using Spectre.Console;
+using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.Diagnostics;
@@ -51,13 +54,21 @@ namespace N_m3u8DL_RE.Util
             string dateString = DateTime.Now.ToString("o");
             StringBuilder command = new StringBuilder("-y -fflags +genpts -loglevel quiet ");
 
+            string customDest = OtherUtil.GetEnvironmentVariable("RE_LIVE_PIPE_OPTIONS");
+            string pipeDir = OtherUtil.GetEnvironmentVariable("RE_LIVE_PIPE_TMP_DIR", Path.GetTempPath());
+
+            if (!string.IsNullOrEmpty(customDest))
+            {
+                command.Append(" -re ");
+            }
+
             foreach (var item in pipeNames)
             {
                 if (OperatingSystem.IsWindows())
                     command.Append($" -i \"\\\\.\\pipe\\{item}\" ");
                 else
                     //command.Append($" -i \"unix://{Path.Combine(Path.GetTempPath(), $"CoreFxPipe_{item}")}\" ");
-                    command.Append($" -i \"{Path.Combine(Path.GetTempPath(), item)}\" ");
+                    command.Append($" -i \"{Path.Combine(pipeDir, item)}\" ");
             }
 
             for (int i = 0; i < pipeNames.Length; i++)
@@ -68,7 +79,20 @@ namespace N_m3u8DL_RE.Util
             command.Append(" -strict unofficial -c copy ");
             command.Append($" -metadata date=\"{dateString}\" ");
             command.Append($" -ignore_unknown -copy_unknown ");
-            command.Append($" -f mpegts -shortest \"{outputPath}\"");
+
+
+            if (!string.IsNullOrEmpty(customDest))
+            {
+                if (customDest.Trim().StartsWith("-"))
+                    command.Append(customDest);
+                else
+                    command.Append($" -f mpegts -shortest \"{customDest}\"");
+                Logger.WarnMarkUp($"[deepskyblue1]{command.ToString().EscapeMarkup()}[/]");
+            }
+            else
+            {
+                command.Append($" -f mpegts -shortest \"{outputPath}\"");
+            }
 
             using var p = new Process();
             p.StartInfo = new ProcessStartInfo()
