@@ -101,7 +101,7 @@ namespace N_m3u8DL_RE.Common.Util
         private static bool CheckMPEG2TS(HttpResponseMessage? webResponse)
         {
             var mediaType = webResponse?.Content.Headers.ContentType?.MediaType?.ToLower();
-            return mediaType == "video/ts" || mediaType == "video/mp2t" || mediaType == "video/mpeg";
+            return mediaType == "video/ts" || mediaType == "video/mp2t" || mediaType == "video/mpeg" || mediaType == "application/octet-stream";
         }
 
         /// <summary>
